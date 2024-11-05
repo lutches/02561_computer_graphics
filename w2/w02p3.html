@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <body style="background-color:navy;">
+        <div>
+            <canvas id="c" width="465" height="425"></canvas>
+        </div>
+        <div>
+            <button id="clear">Clear</button>
+            <input type="color" id="color" value="#6495ED">
+            <button id="triangle">Triangle</button>
+            <button id="dots">Dots</button>
+            <button id="circle">Circle</button>
+            <input type="color" id="dcolor" value="#000000">
+        </div>
+        <text></text>
+        <script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
+        <script type="text/javascript" src="w02p3.js"></script>
+        <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+        <script type="text/javascript" src="../angelCommon/MV.js"></script>
+        <script id="vertex-shader" type="x-shader/x-vertex">
+	        attribute vec4 a_Position;
+            attribute vec4 a_Color;
+            varying vec4 v_Color;
+
+            void main() {
+                gl_Position = a_Position;
+                gl_PointSize = 10.0; // Set point size if you are drawing points
+                v_Color = a_Color; // Pass the color to the fragment shader
+                }
+
+        </script>
+        <script id="fragment-shader" type="x-shader/x-fragment"> 
+	        precision mediump float;
+            varying vec4 v_Color;
+
+            void main() {
+                gl_FragColor = v_Color;
+            }
+        </script>
+        
+    </body>
+</html>

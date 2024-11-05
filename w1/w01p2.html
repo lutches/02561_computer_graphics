@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <canvas id="c" width="512" height="512"></canvas>
+        <script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
+        <script type="text/javascript" src="w01p2.js"></script>
+        <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+        <script type="text/javascript" src="../angelCommon/MV.js"></script>
+        <script id="vertex-shader" type="x-shader/x-vertex">
+	        attribute vec4 a_Position;	
+            attribute vec4 a_Color;	
+            varying vec4 v_Color;
+            
+	        void main() 
+            {		
+                gl_PointSize = 10.0;
+                v_Color = a_Color; 
+		        gl_Position = a_Position;
+	        }
+        </script>
+        <script id="fragment-shader" type="x-shader/x-fragment"> 
+	        precision mediump float;	
+            varying vec4 v_Color;	
+            void main() 
+            {
+		        gl_FragColor = v_Color;
+	        }
+        </script>
+        
+    </body>
+</html>
