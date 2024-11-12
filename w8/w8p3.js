@@ -99,22 +99,22 @@ window.onload = function init() {
 
 
         function getMs() {
-        
+
             // Translation matrix to move light to origin (T_{-pℓ})
             var T = translate(lightcoords[0], lightcoords[1], lightcoords[2]);
             var nT = translate(-lightcoords[0], -lightcoords[1], -lightcoords[2]);
-        
+
             // Projection matrix (Mp) that projects onto the y = groundLevel plane
             var d = -2.9999; // if -3 the shadow will clip with the ground
-            var Mp = mat4(1,0,0,0,0,1,0,0,0,0,1,0,0,1.0/d,0,0);
-        
+            var Mp = mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1.0 / d, 0, 0);
+
             // Compute Ms by combining the matrices: Ms = Tpℓ * Mp * T−pℓ * M
             let Ms = mult(mult(T, Mp), nT);
-            
+
             return Ms;
         }
-        
-        
+
+
 
         let visibilityLoc = gl.getUniformLocation(program, "visibility");
 
