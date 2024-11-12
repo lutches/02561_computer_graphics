@@ -77,7 +77,7 @@ window.onload = function init() {
     var lightPosLocation = gl.getUniformLocation(gl.program, 'lightPos');
     gl.uniform4fv(lightPosLocation, flatten(lightDirection));
   
-    var kd = vec4(1.0, 1.0, 1.0, 1.0); // RED
+    var kd = vec4(0.5, 0.5, 0.5, 1.0); // RED
     var kdLocation = gl.getUniformLocation(gl.program, "kd");
     gl.uniform4fv(kdLocation, flatten(kd));
 

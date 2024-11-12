@@ -15,9 +15,6 @@ window.onload = function init() {
     var view = mat4();
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "view"), false, flatten(view));
 
-    var P = perspective(90, 1, 1, 100);
-    gl.uniformMatrix4fv(gl.getUniformLocation(program, "perspective"), false, flatten(P));
-
     document.getElementById('rotate-switch').addEventListener('change', function () { rotate = this.checked; console.log(rotate); });
 
     // Load the texture image
@@ -117,6 +114,12 @@ window.onload = function init() {
 
 
         function render() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight-80;
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            var aspect = canvas.width / canvas.height;
+            var P = perspective(90, aspect, 1, 100);
+            gl.uniformMatrix4fv(gl.getUniformLocation(program, "perspective"), false, flatten(P));
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
             gl.enable(gl.DEPTH_TEST);
 
@@ -147,7 +150,7 @@ window.onload = function init() {
 
         function animate() {
             if (rotate) {
-                angle += 0.1;
+                angle += 0.01;
                 lightcoords = vec3(2 * Math.sin(angle), 2, 2 * Math.cos(angle) - 2);
                 gl.uniform3fv(gl.getUniformLocation(program, "lightcoordsition"), lightcoords);
                 console.log(lightcoords);

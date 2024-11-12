@@ -18,8 +18,7 @@ window.onload = function init() {
     var view = mat4();
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "view"), false, flatten(view));
 
-    var P = perspective(90, 1, 1, 100);
-    gl.uniformMatrix4fv(gl.getUniformLocation(program, "perspective"), false, flatten(P));
+
 
     document.getElementById('rotate-switch').addEventListener('change', function () { rotate = this.checked; console.log(rotate); });
 
@@ -121,6 +120,12 @@ window.onload = function init() {
         let visibilityLoc = gl.getUniformLocation(program, "visibility");
 
         function render() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight-80;
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            var aspect = canvas.width / canvas.height;
+            var P = perspective(90, aspect, 1, 100);
+            gl.uniformMatrix4fv(gl.getUniformLocation(program, "perspective"), false, flatten(P));
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT); // we don't use stencil buffer yet but good practise to clear all
             gl.enable(gl.DEPTH_TEST);
 

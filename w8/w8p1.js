@@ -89,6 +89,12 @@ window.onload = function init() {
         gl.enableVertexAttribArray(vTexCoord);
 
         function render() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight-80;
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            var aspect = canvas.width / canvas.height;
+            var P = perspective(90, aspect, 1, 100);
+            gl.uniformMatrix4fv(gl.getUniformLocation(program, "perspective"), false, flatten(P));
             gl.clear(gl.COLOR_BUFFER_BIT);
 
             // Draw ground quad with texture 0
@@ -101,6 +107,8 @@ window.onload = function init() {
             gl.uniform1i(gl.getUniformLocation(program, "texMap"), 1);
             gl.drawArrays(gl.TRIANGLE_FAN, 4, 4);
             gl.drawArrays(gl.TRIANGLE_FAN, 8, 4);
+
+            requestAnimationFrame(render);
         }
         render();
     };
