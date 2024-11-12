@@ -1,12 +1,13 @@
+
 <!DOCTYPE html>
 <html>
   <head>
-    <title>w8p2</title>
-    <h1>WebGL 8 - Part 2</h1>
+    <title>w8p3</title>
+    <h1>WebGL 8 - Part 3</h1>
     <link rel="stylesheet" href="../styles.css" />
     <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
     <script type="text/javascript" src="../angelCommon/MV.js"></script>
-    <script type="text/javascript" src="w8p2.js"></script>
+    <script type="text/javascript" src="w8p3.js"></script>
 
     <script id="vertex-shader" type="x-shader/x-vertex">
       attribute vec4 a_Position;
@@ -20,6 +21,7 @@
 
       void main() {
           f_Tex_Coord = a_Tex_Coord;
+
           gl_Position = perspective * model * view * a_Position;
       }
     </script>
@@ -28,11 +30,11 @@
       precision mediump float;
 
       varying vec2 f_Tex_Coord;
-
+      uniform float visibility;
       uniform sampler2D texMap;
 
       void main() {
-          gl_FragColor = texture2D(texMap, f_Tex_Coord);
+          gl_FragColor = texture2D(texMap, f_Tex_Coord) * vec4(vec3(visibility),1);
       }
     </script>
   </head>

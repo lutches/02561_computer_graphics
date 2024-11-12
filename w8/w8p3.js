@@ -1,3 +1,4 @@
+
 var rotate = false;
 
 window.onload = function init() {
@@ -115,9 +116,10 @@ window.onload = function init() {
         
         
 
+        let visibilityLoc = gl.getUniformLocation(program, "visibility");
 
         function render() {
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT); // we don't use stencil buffer yet but good practise to clear all
             gl.enable(gl.DEPTH_TEST);
 
             // Draw ground quad with texture 0
@@ -129,9 +131,12 @@ window.onload = function init() {
             gl.uniform1i(gl.getUniformLocation(program, "texMap"), 1);
 
             // Draw shades
+
+            gl.uniform1f(visibilityLoc, 0.0);
             gl.uniformMatrix4fv(modelLocation, false, flatten(getMs()));
             drawQuads();
 
+            gl.uniform1f(visibilityLoc, 1.0);
             gl.uniformMatrix4fv(modelLocation, false, flatten(mat4()));
             // Draw smaller quads with texture 1
             drawQuads();

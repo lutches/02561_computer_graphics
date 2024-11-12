@@ -1,7 +1,7 @@
 body {
-    background-color: #f0f8ff;
+    background-color: #1e1e1e;
     font-family: 'Arial', sans-serif;
-    color: #333;
+    color: #ffffff;
     margin: 0;
     padding: 0;
 }
@@ -26,7 +26,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: #cccccccc;
     transition: .4s;
     border-radius: 34px;
 }
@@ -42,7 +42,12 @@ body {
     transition: .4s;
     border-radius: 50%;
 }
-
+.switch-text {
+    display: inline-block;
+    margin-left: 10px;
+    vertical-align: middle;
+    font-size: 16px;
+}
 input:checked + .slider {
     background-color: #2196F3;
 }
