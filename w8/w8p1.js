@@ -17,7 +17,7 @@ window.onload = function init() {
 
     // Load the texture image
     var image = new Image();
-    image.src = "xamp23.png";
+    image.src = "../assets/xamp23.png";
     image.onload = function() {
         var texture0 = gl.createTexture();
         gl.activeTexture(gl.TEXTURE0);

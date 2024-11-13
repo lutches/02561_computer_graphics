@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>w9p1</title>
+    <h1>WebGL 9 - Part 1</h1>
+    <link rel="stylesheet" href="../styles.css" />
+    <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+    <script type="text/javascript" src="../angelCommon/MV.js"></script>
+    <script type="text/javascript" src="p1.js"></script>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      attribute vec4 a_Position;
+      attribute vec2 a_Tex_Coord;
+
+      varying vec2 f_Tex_Coord;
+
+      uniform mat4 model;
+      uniform mat4 view;
+      uniform mat4 perspective;
+
+      void main() {
+          f_Tex_Coord = a_Tex_Coord;
+
+          gl_Position = perspective * model * view * a_Position;
+      }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+
+      varying vec2 f_Tex_Coord;
+      uniform float visibility;
+      uniform sampler2D texMap;
+
+      void main() {
+        gl_FragColor = texture2D(texMap, f_Tex_Coord) * vec4(floor(visibility), floor(visibility), floor(visibility), visibility);
+      }
+    </script>
+  </head>
+  <body>
+    <canvas id="webgl-canvas"></canvas>
+    <menu id="controls">
+      <label class="switch">
+        <input type="checkbox" id="rotate-switch" />
+        <span class="slider round"></span>
+      </label>
+    </menu>
+  </body>
+</html>
