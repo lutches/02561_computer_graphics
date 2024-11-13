@@ -79,7 +79,7 @@ button {
     font-size: 16px;
     margin: 4px 2px;
     cursor: pointer;
-    border-radius: 12px;
+    border-radius: 15px;
     transition: background-color 0.3s, transform 0.3s;
 }
 
@@ -100,8 +100,7 @@ canvas {
 
 #controls
 {
-  bottom: 0;
-  left: 0;
+  bottom: -10px;
+  left: -30px;
   position: absolute;
-  width: 100%;
 }

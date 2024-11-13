@@ -63,21 +63,13 @@ window.onload = function init() {
     //////////////////////////////////////////////////////////////////////
     // region camera
 
-    var fov = 45;
-    var aspect = canvas.width / canvas.height;
-    var near = 0.3;
-    var far = 100;
-
-    var perspectiveCamera = perspective(fov, aspect, near, far);
-
-    var cameraProjectionMatrixLocation = gl.getUniformLocation(gl.program, "cameraProjectionMatrix");
-    gl.uniformMatrix4fv(cameraProjectionMatrixLocation, false, flatten(perspectiveCamera));
+    // Perspective is made in the render function to handle resizing of the window
 
     var lightDirection = vec4(0.0, 0.0, -1.0, 0.0);
     var lightPosLocation = gl.getUniformLocation(gl.program, 'lightPos');
     gl.uniform4fv(lightPosLocation, flatten(lightDirection));
   
-    var kd = vec4(0.5, 0.5, 0.5, 1.0); // RED
+    var kd = vec4(0.5, 0.5, 0.5, 1.0); // Grey
     var kdLocation = gl.getUniformLocation(gl.program, "kd");
     gl.uniform4fv(kdLocation, flatten(kd));
 
@@ -107,10 +99,16 @@ window.onload = function init() {
     //////////////////////////////////////////////////////////////////////
 
     initSphere(gl, numSubdivisions);
-    render();
-}
+    
+    
+    function render() {
 
-function render() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight-80;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    var aspect = canvas.width / canvas.height;
+    var P = perspective(60, aspect, 1, 100);
+    gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, "cameraProjectionMatrix"), false, flatten(P));
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -131,6 +129,10 @@ function render() {
 
     requestAnimationFrame(render); // Store the animation frame ID    
 }
+render();
+}
+
+
 
 
 function initSphere(gl, numSubdivisions) {
