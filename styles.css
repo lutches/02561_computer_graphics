@@ -104,3 +104,25 @@ canvas {
   left: -30px;
   position: absolute;
 }
+
+#linkbutton
+{
+    background-color: #333;
+    border: none;
+    color: white;
+    padding: 10px 48px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 40px;
+    margin: 4px 4px;
+    cursor: pointer;
+    border-radius: 15px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+#list
+{
+    margin-inline: 100px; 
+    
+}
