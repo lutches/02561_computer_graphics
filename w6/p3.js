@@ -92,10 +92,11 @@ window.onload = function init() {
 
     var increase = document.getElementById("increase");
     increase.addEventListener('click', function () {
-        if (numSubdivisions < 10) {
+        if (numSubdivisions < 9) {
             numSubdivisions++;
+            initSphere(gl, numSubdivisions);
         }
-        initSphere(gl, numSubdivisions);
+        
 
     });
 
@@ -103,8 +104,9 @@ window.onload = function init() {
     decrease.addEventListener('click', function () {
         if (numSubdivisions > 0) {
             numSubdivisions--;
+            initSphere(gl, numSubdivisions);
         }
-        initSphere(gl, numSubdivisions);
+        
     });
 
     //////////////////////////////////////////////////////////////////////
