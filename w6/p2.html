@@ -2,12 +2,11 @@
 <html>
 <head>
     <link rel="stylesheet" href="../styles.css" />
-    <title>w6p1</title>
-    <title>w06p1</title>
-    <h1>WebGL 5 - Part 4</h1>
+    <title>w06p2</title>
+    <h1>WebGL 6 - Part 2</h1>
     <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
     <script type="text/javascript" src="../angelCommon/MV.js"></script>
-    <script type="text/javascript" src="w6p1.js"></script>
+    <script type="text/javascript" src="p2.js"></script>
 
     <script id="vertex-shader" type="x-shader/x-vertex">
         attribute vec4 a_Position;
@@ -41,5 +40,23 @@
     <canvas id="webgl-canvas" width="512" height="512">
         Please use a browser that supports HTML5 canvas.
     </canvas>
+    <menu id="controls">
+        <select id="textureWrap">
+            <option value = "0" selected>repeat</option>
+            <option value = "1">clamp to edge</option>
+        </select>
+        <select id="magFilter">
+            <option value = "0" selected>nearest</option>
+            <option value = "1">linear</option>
+        </select>
+        <select id="minFilter">
+            <option value ="0" selected>nearest</option>
+            <option value ="1">linear</option>
+            <option value ="2">nearest mipmap nearest</option>
+            <option value ="3">linear mipmap nearest</option>
+            <option value ="4">nearest mipmap linear</option>
+            <option value ="5">linear mipmap linear</option>
+        </select>
+    </menu>
 </body>
 </html>
