@@ -1,6 +1,7 @@
 h1 {
     text-align: center;
     margin-left: 2%;
+    font-size: 100%;
 }
 html, body {
     max-width: 100%;
@@ -133,7 +134,7 @@ a {
 }
 
 p {
-    font-size: 8px;
+    font-size: 16px;
 }
 
 select {
