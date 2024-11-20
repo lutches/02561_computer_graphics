@@ -132,9 +132,13 @@ a {
     text-decoration: none;
 }
 
+p {
+    font-size: 8px;
+}
+
 select {
     padding: 5px;
-    font-size: 16px;
+    font-size: 8px;
     border-radius: 5px;
     color :inherit;
     background-color: #333;
