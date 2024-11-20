@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <link rel="stylesheet" href="../styles.css" />
     <title>w06p2</title>
     <h1>WebGL 6 - Part 2</h1>
@@ -9,54 +9,67 @@
     <script type="text/javascript" src="p2.js"></script>
 
     <script id="vertex-shader" type="x-shader/x-vertex">
-        attribute vec4 a_Position;
-        attribute vec2 a_Tex_Coord;
+      attribute vec4 a_Position;
+      attribute vec2 a_Tex_Coord;
 
-        varying vec2 f_Tex_Coord;
+      varying vec2 f_Tex_Coord;
 
-        uniform mat4 view;
-        uniform mat4 perspective;
+      uniform mat4 view;
+      uniform mat4 perspective;
 
-        void main() {
-            f_Tex_Coord = a_Tex_Coord;
-            gl_Position = perspective * view * a_Position;
-        }
+      void main() {
+          f_Tex_Coord = a_Tex_Coord;
+          gl_Position = perspective * view * a_Position;
+      }
     </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
-        precision mediump float;
+      precision mediump float;
 
-        varying vec2 f_Tex_Coord;
+      varying vec2 f_Tex_Coord;
 
-        uniform sampler2D texMap;
+      uniform sampler2D texMap;
 
-        void main() {
-            gl_FragColor = texture2D(texMap, f_Tex_Coord);
-        }
+      void main() {
+          gl_FragColor = texture2D(texMap, f_Tex_Coord);
+      }
     </script>
-
-</head>
-<body>
+  </head>
+  <body>
     <canvas id="webgl-canvas" width="512" height="512">
-        Please use a browser that supports HTML5 canvas.
+      Please use a browser that supports HTML5 canvas.
     </canvas>
     <menu id="controls">
-        <select id="textureWrap">
-            <option value = "0" selected>repeat</option>
-            <option value = "1">clamp to edge</option>
-        </select>
-        <select id="magFilter">
-            <option value = "0" selected>nearest</option>
-            <option value = "1">linear</option>
-        </select>
-        <select id="minFilter">
-            <option value ="0" selected>nearest</option>
-            <option value ="1">linear</option>
-            <option value ="2">nearest mipmap nearest</option>
-            <option value ="3">linear mipmap nearest</option>
-            <option value ="4">nearest mipmap linear</option>
-            <option value ="5">linear mipmap linear</option>
-        </select>
+      <select id="textureWrap">
+        <option value="0" selected>repeat</option>
+        <option value="1">clamp to edge</option>
+      </select>
+      <select id="magFilter">
+        <option value="0" selected>nearest</option>
+        <option value="1">linear</option>
+      </select>
+      <select id="minFilter">
+        <option value="0" selected>nearest</option>
+        <option value="1">linear</option>
+        <option value="2">nearest mipmap nearest</option>
+        <option value="3">linear mipmap nearest</option>
+        <option value="4">nearest mipmap linear</option>
+        <option value="5">linear mipmap linear</option>
+      </select>
+      <div style="background-color: #333; padding: 5px;">
+        <p>
+          The <b>Texture magnification</b> filter affects texels covering
+          multiple pixles. Using nearest fitering couses the straight line to
+          get a staircase effect. to instead use bilinear filtering however the
+          sharpness is greatly reduced
+          <br />
+          The <b>Texture minification</b> filter affects pixles covering
+          multiple texels. Using nearest neightbour and bilinear filtering have
+          very small effect. But we can here use <b>Bitmapping</b>. this
+          generates a series of smaller texture arrays. that webgl can use to
+          use the appropriate texel size.
+        </p>
+      </div>
     </menu>
-</body>
+  </body>
 </html>

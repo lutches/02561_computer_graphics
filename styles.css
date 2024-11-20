@@ -102,6 +102,7 @@ canvas {
 {
   bottom: -10px;
   left: -30px;
+  right: 10px;
   position: absolute;
 }
 
@@ -124,7 +125,6 @@ canvas {
 #list
 {
     margin-inline: auto; 
-    
 }
 
 a {
