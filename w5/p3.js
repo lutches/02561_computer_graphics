@@ -1,5 +1,3 @@
-
-
 var gl;
 var canvas;
 
@@ -37,7 +35,7 @@ window.onload = function init() {
     gl.cullFace(gl.BACK);
     // Perspective is made in the render function to handle resizing of the window
 
-    var scale = 0.5;
+    var scale = 0.02;
 
     loadmodel(gl, scale);
 
@@ -93,9 +91,9 @@ window.onload = function init() {
         const modelViewLocation = gl.getUniformLocation(gl.program, 'modelViewMatrix');
         gl.uniformMatrix4fv(modelViewLocation, false, flatten(modelViewMatrix));
 
+        gl.getExtension('OES_element_index_uint');
         // Draw the object
-        const vertexCount = pointArray.length / 3; // Assuming pointArray holds [x, y, z] for each vertex
-        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_INT, 0);
 
         // Request the next frame
         requestAnimationFrame(render);
@@ -106,7 +104,7 @@ window.onload = function init() {
 
 async function loadmodel(gl, scale) {
     // Load the object file and parse its vertices and normals
-    const object = await readOBJFile('../assets/teapot.obj', scale, true);
+    const object = await readOBJFile('../assets/rat.obj', scale, true);
     pointArray = object.vertices; // Vertex positions
     normalsArray = object.normals; // Vertex normals
     indices = object.indices; // Indices for drawing triangles
@@ -131,7 +129,7 @@ async function loadmodel(gl, scale) {
     gl.bufferData(gl.ARRAY_BUFFER, pointArray, gl.STATIC_DRAW);
 
     // Configure the vertex position attribute
-    gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(a_Position, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(a_Position);
 
     // Create, bind, and initialize the vertex buffer for normals
@@ -140,7 +138,7 @@ async function loadmodel(gl, scale) {
     gl.bufferData(gl.ARRAY_BUFFER, normalsArray, gl.STATIC_DRAW);
 
     // Configure the vertex normal attribute
-    gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(a_Normal, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(a_Normal);
 
     // Unbind the buffer for safety
@@ -148,8 +146,3 @@ async function loadmodel(gl, scale) {
 
     console.log('Model loaded successfully.');
 }
-
-
-
-
-
