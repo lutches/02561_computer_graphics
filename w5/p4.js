@@ -5,9 +5,6 @@ var pointArray = [];
 var normalsArray = [];
 var indices = [];
 var colors = [];
-var numSubdivisions = 3;
-
-
 
 var orbiting = true;
 var orbitRadius = 4;
@@ -60,6 +57,7 @@ window.onload = function init() {
 
 
     function render() {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         // Adjust the canvas size and viewport
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight - 80;
@@ -67,12 +65,11 @@ window.onload = function init() {
 
         // Calculate aspect ratio and set the projection matrix
         const aspect = canvas.width / canvas.height;
-        const P = perspective(60, aspect, 1, 100); // FOV, aspect ratio, near, far
+        const P = perspective(60, aspect, 0.1, 10); // FOV, aspect ratio, near, far
         const projectionLocation = gl.getUniformLocation(gl.program, "cameraProjectionMatrix");
         gl.uniformMatrix4fv(projectionLocation, false, flatten(P));
 
         // Clear the canvas and depth buffer
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         // Handle orbiting camera movement
         if (orbiting) {
@@ -109,6 +106,9 @@ async function loadmodel(gl, scale) {
     normalsArray = object.normals; // Vertex normals
     indices = object.indices; // Indices for drawing triangles
 
+    console.log(pointArray);
+    console.log(normalsArray);
+    console.log(indices);
 
     // Get attribute locations from the shader program
     const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
@@ -117,11 +117,6 @@ async function loadmodel(gl, scale) {
     let indexbuffer = gl.createBuffer()
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexbuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-
-    if (a_Position < 0 || a_Normal < 0) {
-        console.error('Failed to get the storage location of attribute variables');
-        return;
-    }
 
     // Create, bind, and initialize the vertex buffer for positions
     const vertexBuffer = gl.createBuffer();
