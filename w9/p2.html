@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>w9p1</title>
+    <h1>WebGL 9 - Part 1</h1>
+    <link rel="stylesheet" href="../styles.css" />
+
+    <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+    <script type="text/javascript" src="../angelCommon/MV.js"></script>
+    <script type="text/javascript" src="../common/OBJParser.js"></script>
+    <script type="text/javascript" src="p2.js"></script>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      attribute vec4 a_Position;
+      attribute vec2 a_Tex_Coord;
+
+      varying vec2 f_Tex_Coord;
+
+      uniform mat4 model;
+      uniform mat4 view;
+      uniform mat4 projection;
+
+      void main() {
+          f_Tex_Coord = a_Tex_Coord;
+
+          gl_Position = projection * model * view * a_Position;
+      }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+
+      varying vec2 f_Tex_Coord;
+      uniform sampler2D texMap;
+
+      void main() {
+        gl_FragColor = texture2D(texMap, f_Tex_Coord);
+      }
+    </script>
+
+    <script id="vertex-shader-obj" type="x-shader/x-vertex">
+        attribute vec4 a_Position;
+        attribute vec4 a_Normal;
+  
+        varying vec4 v_Color; // Final color that is passed to the fragment-shader
+  
+        uniform vec4 lightPos;
+  
+        uniform vec4 kd; // Basically material color
+        uniform float visibility;
+        uniform mat4 model, view, Ms, yOffset;
+        uniform mat4 projection;
+  
+        void main() {
+            vec4 pos = (Ms == mat4(0.0)) ? (projection * view * model * yOffset * a_Position) : (projection * view * model * Ms * yOffset * a_Position);
+  
+            vec3 w_i = lightPos.w == 0.0 ? normalize(-lightPos.xyz) : normalize(lightPos.xyz - pos.xyz);
+            float diffuseFactor = (Ms == mat4(0.0)) ? (max(dot(normalize(a_Normal.xyz), w_i), 0.0)) : 1.0;
+  
+            v_Color = visibility == 1.0 ? vec4(kd.xyz * diffuseFactor, kd.w): vec4(0.0, 0.0, 0.0, visibility);
+            gl_Position = pos;
+        }
+      </script>
+  
+      <script id="fragment-shader-obj" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec4 v_Color;
+  
+        void main()
+        {
+            gl_FragColor = v_Color;
+        }
+      </script>
+  </head>
+  <body>
+    <canvas id="webgl-canvas"></canvas>
+    <menu id="controls">
+      <label class="switch">
+        <input type="checkbox" id="rotate-switch" />
+        <span class="slider round"></span>
+      </label>
+    </menu>
+  </body>
+</html>
