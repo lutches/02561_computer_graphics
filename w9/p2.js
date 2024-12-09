@@ -186,6 +186,7 @@ window.onload = async function init() {
         gl.uniformMatrix4fv(gl.getUniformLocation(program_obj, "projection"), false, flatten(P));
         gl.uniform1f(gl.getUniformLocation(program_obj, "visibility"), 1);
         gl.uniform4fv(gl.getUniformLocation(program_obj, "lightPos"), lightcoords);
+        console.log(lightcoords);
         gl.uniformMatrix4fv(gl.getUniformLocation(program_obj, "yOffset"), false, flatten(translate(0, Math.abs(Math.sin(jumpvalue)/2), 0, 0)));
         gl.uniformMatrix4fv(MsLocation, false, flatten(mat4(0)));
 

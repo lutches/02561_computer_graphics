@@ -47,7 +47,7 @@ window.onload = async function init() {
     program_obj.a_Normal = gl.getAttribLocation(program_obj, "a_Normal");
 
 
-    var model = await loadModel("../assets/rat.obj", 2, at);
+    var model = await loadModel("../assets/rat.obj", 0.02, at);
     model.vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(model.vertices), gl.STATIC_DRAW);
@@ -160,9 +160,8 @@ window.onload = async function init() {
 
         if (rotate) { angle += 3.14 / 60; }
         lightcoords = add(vec3(2 * Math.sin(angle), 3, 2 * Math.cos(angle)), at);
-        jumpvalue += 0.05;
         lightMatrix = lookAt(lightcoords, at, up);
-        render(gl, drawables, lightMatrix, P, vec4(lightcoords, 1), jumpvalue);
+        render(gl, drawables, lightMatrix, P, vec4(lightcoords, 0));
         requestAnimationFrame(animate);
     }
 
@@ -181,7 +180,7 @@ window.onload = async function init() {
 };
 
 // Load a model from an OBJ file
-async function loadModel(path, scale = 0.2, where = vec3(0, 0, 0)) {
+async function loadModel(path, scale = 0.02, where = vec3(0, -1.12, -3)) {
     const object = await readOBJFile(path, scale); // Assumes `readOBJFile` is a function to parse OBJ files.
 
     object.m = mult(translate(where), mat4(
@@ -225,7 +224,7 @@ function initFramebufferObject(gl, width, height) {
     return framebuffer;
 }
 
-function render(gl, drawables, view, perspective, lightcoords, jumpvalue) {
+function render(gl, drawables, view, perspective, lightcoords) {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     gl.useProgram(drawables[1].program);
