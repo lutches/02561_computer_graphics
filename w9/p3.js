@@ -158,10 +158,8 @@ window.onload = async function init() {
         render()
         requestAnimationFrame(animate);
     }
-
-
-
     animate();
+
     function render() {
         projection = perspective(65, canvas.width/canvas.height, 0.1, 25);
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
@@ -181,7 +179,7 @@ window.onload = async function init() {
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        drawGround();
+        //drawGround();
         drawObject();
     }
 
