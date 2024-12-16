@@ -94,6 +94,13 @@ button:active {
     transform: scale(0.95);
 }
 
+canvas {
+    display: block;
+    margin: 0 auto;
+    background-color: #333;
+    border-radius: 15px;
+}
+
 #controls
 {
   bottom: -10px;

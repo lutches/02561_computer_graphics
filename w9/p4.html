@@ -9,7 +9,7 @@
     <script type="text/javascript" src="../angelCommon/MV.js"></script>
     <script type="text/javascript" src="../common/OBJParser.js"></script>
     <script type="text/javascript" src="../common/webgl-utils.js"></script>
-    <script type="text/javascript" src="p3.js"></script>
+    <script type="text/javascript" src="p4.js"></script>
 
     <script id="vertex-shader-ground" type="x-shader/x-vertex">
       precision mediump float;
@@ -46,7 +46,6 @@
         uniform mat4 viewFromLight;
 
         void main() {
-            vec4 shadow = texture2D(u_ShadowMap, fTexCoord);
             vec4 tex = texture2D(texMap, fTexCoord);
             vec4 marble = vec4(tex.xyz, 1.0);
 
@@ -59,7 +58,7 @@
 
             float visibility = (shadowCoord.z > depth + 0.005) ? 1.0 : 0.7;
 
-            gl_FragColor = vec4(marble.rgb * visibility, marble.a); // marble -> depth, rgba -> white?
+            gl_FragColor = vec4(marble.rgb * visibility, marble.a);
 
             }
     </script>
@@ -109,7 +108,7 @@
 
       void main() {
 
-          gl_Position = projection * view * model * vPosition;
+          gl_Position = vPosition;
 
       }
     </script>

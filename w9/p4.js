@@ -51,9 +51,9 @@ var lightPos = vec3(radius * Math.sin(alpha), 0, radius * Math.cos(alpha));
 
 window.onload = async function init() {
     var canvas = document.getElementById("webgl-canvas");
-    var gl = WebGLUtils.setupWebGL(canvas); 
-    if (!gl) { 
-        alert("WebGL isn't available"); 
+    var gl = WebGLUtils.setupWebGL(canvas);
+    if (!gl) {
+        alert("WebGL isn't available");
     }
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0); // cornflower blue
@@ -161,7 +161,7 @@ window.onload = async function init() {
             gl.useProgram(program_object);
             gl.uniform4fv(program_object.lightLoc, lightPos);
 
-            eye_l = add(vec3(lightPos),lightCenter);
+            eye_l = add(vec3(lightPos), lightCenter);
             at_l = vec3(0.0, -1.0, -3.0);
 
             v_l = lookAt(eye_l, at_l, up);
@@ -170,7 +170,7 @@ window.onload = async function init() {
         if (follow) {
             view = v_l;
         }
-        else {view = lookAt(eye, at, up)}
+        else { view = lookAt(eye, at, up) }
         objectModel = translate(vec3(0.0, yCoord, -3))
         render()
         requestAnimationFrame(animate);
@@ -179,7 +179,7 @@ window.onload = async function init() {
 
     function render() {
         lightView = lookAt(vec3(lightPos), at, up);
-        
+
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         gl.viewport(0, 0, fbo.width, fbo.height);
@@ -194,7 +194,7 @@ window.onload = async function init() {
         gl.disable(gl.CULL_FACE);
 
         initAttributeVariable(gl, program_object.vPosition, model.vBuffer)
-        
+
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.idxBuffer);
         gl.drawElements(gl.TRIANGLES, object.indices.length, gl.UNSIGNED_INT, 0);
 
@@ -207,15 +207,15 @@ window.onload = async function init() {
     }
 
     function drawGround() {
-        
+
 
         gl.useProgram(program_ground);
 
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, fbo.texture);
         gl.uniform1i(gl.getUniformLocation(program_ground, "u_ShadowMap"), 1);
-        
-        
+
+
         initAttributeVariable(gl, program_ground.vPosition, program_ground.vBuffer);
         initAttributeVariable(gl, program_ground.vTexCoord, program_ground.texBuffer);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, program_ground.idxBuffer);
@@ -244,7 +244,7 @@ window.onload = async function init() {
         gl.bindBuffer(gl.ARRAY_BUFFER, model.cBuffer);
         gl.vertexAttribPointer(program_object.vColor, 4, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(program_object.vColor);
-        
+
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.idxBuffer);
         gl.uniformMatrix4fv(program_object.vLoc, false, flatten(view));
@@ -288,10 +288,10 @@ function initVertexBuffers(gl, program) {
     // save me some repetitive writing.
     function createEmptyArrayBuffer(gl, a_attribute, num, type) {
         var buffer = gl.createBuffer();  // Create a buffer object
-        
+
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);
-        gl.enableVertexAttribArray(a_attribute);  
+        gl.enableVertexAttribArray(a_attribute);
 
         return buffer;
     }
