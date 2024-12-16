@@ -1,5 +1,6 @@
 let program_object, program_ground, program_shadow;
 let gl;
+let fbo;
 
 
 let eye = vec3(0, 0, 0);
@@ -9,9 +10,10 @@ let view = lookAt(eye, at, up);
 let yCoord = -0.999;
 let objectModel = translate(vec3(0.0, yCoord, -3.0))
 var projection;
-let projectionLight = perspective(65, 1.0, 0.01, 25);
 let lightView;
 
+let at_l, v_l, p_l;
+let eye_l;
 
 var object;
 
@@ -40,6 +42,7 @@ var texCoords = [
 ];
 
 var rotate = true;
+var follow = false;
 var radius = 3.5;
 var alpha = 0.0;
 var lightCenter = vec3(0.0, 3.5, -3.0);
@@ -48,7 +51,10 @@ var lightPos = vec3(radius * Math.sin(alpha), 0, radius * Math.cos(alpha));
 
 window.onload = async function init() {
     var canvas = document.getElementById("webgl-canvas");
-    var gl = canvas.getContext("webgl");
+    var gl = WebGLUtils.setupWebGL(canvas); 
+    if (!gl) { 
+        alert("WebGL isn't available"); 
+    }
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0); // cornflower blue
     gl.enable(gl.BLEND);
@@ -58,11 +64,11 @@ window.onload = async function init() {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
     gl.getExtension('OES_element_index_uint');
 
-    let fboSize = 512;
-    let fbo = initFramebufferObject(gl, fboSize, fboSize);
+    fbo = initFramebufferObject(gl, 512.0, 512.0);
 
     // Rotate button
     document.getElementById('rotate-switch').addEventListener('change', function () { rotate = this.checked; });
+    document.getElementById('follow-switch').addEventListener('change', function () { follow = this.checked; });
 
 
 
@@ -106,8 +112,6 @@ window.onload = async function init() {
 
     model = initVertexBuffers(gl, program_object);
 
-    fbo = initFramebufferObject(gl, fboSize, fboSize);
-
     object = await readOBJFile('../assets/teapot.obj', 0.25, true);
     if (object) {
         if (buffer(gl, model, object)) { console.log("buffered object"); }
@@ -149,13 +153,24 @@ window.onload = async function init() {
 
 
     function animate() {
+        projection = perspective(65, canvas.width / canvas.height, 0.01, 10);
         if (rotate) {
             alpha += 0.01;
             lightPos = vec4(radius * Math.sin(alpha), 0, radius * Math.cos(alpha), 0.0);
 
             gl.useProgram(program_object);
             gl.uniform4fv(program_object.lightLoc, lightPos);
+
+            eye_l = add(vec3(lightPos),lightCenter);
+            at_l = vec3(0.0, -1.0, -3.0);
+
+            v_l = lookAt(eye_l, at_l, up);
+            p_l = projection;
         }
+        if (follow) {
+            view = v_l;
+        }
+        else {view = lookAt(eye, at, up)}
         objectModel = translate(vec3(0.0, yCoord, -3))
         render()
         requestAnimationFrame(animate);
@@ -164,7 +179,7 @@ window.onload = async function init() {
 
     function render() {
         lightView = lookAt(vec3(lightPos), at, up);
-        projection = perspective(65, canvas.width / canvas.height, 0.01, 10);
+        
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         gl.viewport(0, 0, fbo.width, fbo.height);
@@ -173,8 +188,8 @@ window.onload = async function init() {
         gl.useProgram(program_shadow);
 
         gl.uniformMatrix4fv(program_shadow.mLoc, false, flatten(objectModel));
-        gl.uniformMatrix4fv(program_shadow.vLoc, false, flatten(lightView));
-        gl.uniformMatrix4fv(program_shadow.pLoc, false, flatten(projectionLight));
+        gl.uniformMatrix4fv(program_shadow.vLoc, false, flatten(v_l));
+        gl.uniformMatrix4fv(program_shadow.pLoc, false, flatten(p_l));
 
         gl.disable(gl.CULL_FACE);
 
@@ -208,11 +223,11 @@ window.onload = async function init() {
         gl.uniformMatrix4fv(program_ground.vLoc, false, flatten(view));
         gl.uniformMatrix4fv(program_ground.pLoc, false, flatten(projection));
         gl.uniformMatrix4fv(program_ground.mloc, false, flatten(mat4()));
-        gl.uniformMatrix4fv(program_ground.vlightLoc, false, flatten(lightView));
+        gl.uniformMatrix4fv(program_ground.vlightLoc, false, flatten(v_l));
         gl.uniform1f(gl.getUniformLocation(program_ground, "visibility"), 1.0);
 
         gl.enable(gl.CULL_FACE)
-        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_INT, 0);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
     }
 
     function drawObject() {
