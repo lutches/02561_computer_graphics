@@ -1,74 +1,138 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>w9p1</title>
+    <title>w9p3</title>
     <h1>WebGL 9 - Part 3</h1>
     <link rel="stylesheet" href="../styles.css" />
 
     <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
     <script type="text/javascript" src="../angelCommon/MV.js"></script>
     <script type="text/javascript" src="../common/OBJParser.js"></script>
+    <script type="text/javascript" src="../common/webgl-debug.js"></script>
     <script type="text/javascript" src="p3.js"></script>
 
-    <script id="vertex-shader" type="x-shader/x-vertex">
-      attribute vec4 a_Position;
-      attribute vec2 a_Tex_Coord;
+    <script id="vertex-shader-ground" type="x-shader/x-vertex">
+      precision mediump float;
 
-      varying vec2 f_Tex_Coord;
-
-      uniform mat4 model;
       uniform mat4 view;
-      uniform mat4 perspective;
+      uniform mat4 projection;
+      uniform mat4 model;
+
+      attribute vec4 vPosition;
+      attribute vec2 vTexCoord;
+      varying vec2 fTexCoord;
+      varying vec4 fPosition;
 
       void main() {
-          f_Tex_Coord = a_Tex_Coord;
-
-          gl_Position = perspective * model * view * a_Position;
+          fTexCoord = vTexCoord;
+          fPosition = vPosition;
+          gl_Position = projection * view * model * vPosition;
       }
     </script>
 
-    <script id="fragment-shader" type="x-shader/x-fragment">
+    <script id="fragment-shader-ground" type="x-shader/x-fragment">
       precision mediump float;
 
-      varying vec2 f_Tex_Coord;
+      varying vec2 fTexCoord;
+      varying vec4 fPosition;
+
       uniform sampler2D texMap;
+      uniform sampler2D u_ShadowMap;
+
+      uniform float visibility;
+
+      uniform mat4 model;
+      uniform mat4 projection;
+      uniform mat4 viewFromLight;
 
       void main() {
-        gl_FragColor = texture2D(texMap, f_Tex_Coord);
-      }
+
+          vec4 tex = texture2D(texMap, fTexCoord);
+          vec4 marble = vec4(tex.xyz, 1.0);
+
+          vec4 v_PositionFromLight = projection * viewFromLight * model * fPosition;
+          vec3 shadowCoord = (v_PositionFromLight.xyz/v_PositionFromLight.w) / 2.0 + 0.5;
+
+          vec4 rgbaDepth = texture2D(u_ShadowMap, shadowCoord.xy);
+
+          float depth = rgbaDepth.r; // Retrieve the z value from R
+
+          float visibility = (shadowCoord.z > depth + 0.005) ? 1.0 : 0.7;
+
+          gl_FragColor = vec4(marble.rgb * visibility, marble.a); // marble -> depth, rgba -> white?
+
+          }
     </script>
 
     <script id="vertex-shader-obj" type="x-shader/x-vertex">
-        attribute vec4 a_Position;
-        attribute vec4 a_Normal;
-  
-        varying vec4 v_Color; // Final color that is passed to the fragment-shader
-  
-        uniform vec4 lightPos;
-  
-        uniform vec4 kd; // Basically material color
-        uniform mat4 model, view, perspective;
-  
-        void main() {
-            vec4 pos =  perspective * view * model * a_Position;
-  
-            vec3 w_i = lightPos.w == 0.0 ? normalize(-lightPos.xyz) : normalize(lightPos.xyz - pos.xyz);
-            float diffuseFactor = (max(dot(normalize(a_Normal.xyz), w_i), 0.0));
-  
-            v_Color = vec4(kd.xyz * diffuseFactor, kd.w);
-            gl_Position = pos;
-        }
-      </script>
-  
-      <script id="fragment-shader-obj" type="x-shader/x-fragment">
-        precision mediump float;
-        varying vec4 v_Color;
-  
-        void main()
-        {
-            gl_FragColor = v_Color;
-        }
-      </script>
+      attribute vec4 vPosition;
+      attribute vec4 vNormal;
+      attribute vec4 vColor;
+
+      varying vec4 fColor;
+
+      uniform vec3 lightPos;
+
+      uniform vec4 kd; // Basically material color
+      uniform mat4 model, view, projection;
+
+      void main() {
+          vec4 pos =  projection * view * model * vPosition;
+
+          vec3 w_i = normalize(lightPos.xyz - pos.xyz);
+          float diffuseFactor = (max(dot(normalize(vNormal.xyz), w_i), 0.0));
+
+          fColor = vec4(vColor.xyz * diffuseFactor, vColor.w);
+          gl_Position = pos;
+      }
+    </script>
+
+    <script id="fragment-shader-obj" type="x-shader/x-fragment">
+      precision mediump float;
+      varying vec4 fColor;
+
+      void main()
+      {
+          gl_FragColor = fColor;
+      }
+    </script>
+
+    <script id="vertex-shader-shadows" type="x-shader/x-vertex">
+
+      precision mediump float;
+
+      attribute vec4 vPosition;
+
+      uniform mat4 view;
+      uniform mat4 projection;
+      uniform mat4 model;
+
+
+      void main() {
+
+          gl_Position = projection * view * model * vPosition;
+
+      }
+    </script>
+
+    <script id="fragment-shader-shadows" type="x-shader/x-fragment">
+
+      precision mediump float;
+
+      void main() {
+
+          const vec4 bitShift = vec4(1.0, 256.0, 256.0*256.0, 256.0*256.0*256.0);
+
+          const vec4 bitMask = vec4(1.0/256.0, 1.0/256.0, 1.0/256.0, 0.0);
+
+          vec4 rgbaDepth = fract(gl_FragCoord.z*bitShift);
+
+          rgbaDepth -= rgbaDepth.gbaa*bitMask;
+
+          gl_FragColor = rgbaDepth;
+
+      }
+    </script>
   </head>
   <body>
     <canvas id="webgl-canvas"></canvas>

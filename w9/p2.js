@@ -134,20 +134,21 @@ window.onload = async function init() {
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
 
-    // Index Buffer
-    var indexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(drawables[1].model.indices), gl.STATIC_DRAW);
-
+    
     // Texture Buffer
     var tBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, tBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(drawables[1].model.texCoords), gl.STATIC_DRAW);
-
+    
     var vTexCoord = gl.getAttribLocation(drawables[1].program, "a_Tex_Coord");
     gl.vertexAttribPointer(vTexCoord, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vTexCoord);
-
+    
+    // Index Buffer
+    var indexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(drawables[1].model.indices), gl.STATIC_DRAW);
+    
     var angle = 0;
     var lightcoords = vec4(2, 2, 2, 1);
 
