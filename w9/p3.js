@@ -2,14 +2,15 @@ let program_object, program_ground, program_shadow;
 let gl;
 
 
-let eye = vec3(3, 0, -3);
+let eye = vec3(0, 0, 0);
 let up = vec3(0, 1, 0);
-let at = vec3(0, -1, -3);
+let at = vec3(0, 0, -1);
 let view = lookAt(eye, at, up);
 let yCoord = -0.999;
 let objectModel = translate(vec3(0.0, yCoord, -3.0))
 var projection;
 let projectionLight = perspective(65, 1.0, 0.01, 25);
+let lightView;
 
 
 var object;
@@ -42,7 +43,7 @@ var rotate = true;
 var radius = 3.5;
 var alpha = 0.0;
 var lightCenter = vec3(0.0, 3.5, -3.0);
-var lightPos = add(vec3(radius * Math.sin(alpha), 0, radius * Math.cos(alpha)), lightCenter);
+var lightPos = vec3(radius * Math.sin(alpha), 0, radius * Math.cos(alpha));
 
 
 window.onload = async function init() {
@@ -113,7 +114,6 @@ window.onload = async function init() {
     }
 
     // Ground
-
     program_ground.vBuffer = gl.createBuffer();
     program_ground.vBuffer.num = 4;
     program_ground.vBuffer.type = gl.FLOAT;
@@ -123,6 +123,7 @@ window.onload = async function init() {
     program_ground.vPosition = gl.getAttribLocation(program_ground, 'vPosition');
     gl.vertexAttribPointer(program_ground.vPosition, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(program_ground.vPosition);
+
 
     program_ground.texBuffer = gl.createBuffer();
     program_ground.texBuffer.num = 2;
@@ -149,29 +150,36 @@ window.onload = async function init() {
 
     function animate() {
         if (rotate) {
-            alpha += 0.1;
-            lightPos = add(vec3(radius * Math.sin(alpha), 0, radius * Math.cos(alpha)), lightCenter);
+            alpha += 0.01;
+            lightPos = vec4(radius * Math.sin(alpha), 0, radius * Math.cos(alpha), 0.0);
 
             gl.useProgram(program_object);
-            gl.uniform3fv(program_object.lightLoc, lightPos);
+            gl.uniform4fv(program_object.lightLoc, lightPos);
         }
+        objectModel = translate(vec3(0.0, yCoord, -3))
         render()
         requestAnimationFrame(animate);
     }
     animate();
 
     function render() {
-        projection = perspective(65, canvas.width/canvas.height, 0.1, 25);
+        lightView = lookAt(vec3(lightPos), at, up);
+        projection = perspective(65, canvas.width / canvas.height, 0.01, 10);
+
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         gl.viewport(0, 0, fbo.width, fbo.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         gl.useProgram(program_shadow);
+
         gl.uniformMatrix4fv(program_shadow.mLoc, false, flatten(objectModel));
-        gl.uniformMatrix4fv(program_shadow.vLoc, false, flatten(lookAt(lightPos, at, up)));
+        gl.uniformMatrix4fv(program_shadow.vLoc, false, flatten(lightView));
         gl.uniformMatrix4fv(program_shadow.pLoc, false, flatten(projectionLight));
 
         gl.disable(gl.CULL_FACE);
+
+        initAttributeVariable(gl, program_object.vPosition, model.vBuffer)
+        
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.idxBuffer);
         gl.drawElements(gl.TRIANGLES, object.indices.length, gl.UNSIGNED_INT, 0);
 
@@ -179,60 +187,63 @@ window.onload = async function init() {
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        //drawGround();
+        drawGround();
         drawObject();
     }
 
     function drawGround() {
+        
+
         gl.useProgram(program_ground);
-    
+
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, fbo.texture);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, program_ground.idxBuffer);
         gl.uniform1i(gl.getUniformLocation(program_ground, "u_ShadowMap"), 1);
-    
-    
+        
+        
         initAttributeVariable(gl, program_ground.vPosition, program_ground.vBuffer);
         initAttributeVariable(gl, program_ground.vTexCoord, program_ground.texBuffer);
-    
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, program_ground.idxBuffer);
+
         gl.uniformMatrix4fv(program_ground.vLoc, false, flatten(view));
         gl.uniformMatrix4fv(program_ground.pLoc, false, flatten(projection));
         gl.uniformMatrix4fv(program_ground.mloc, false, flatten(mat4()));
+        gl.uniformMatrix4fv(program_ground.vlightLoc, false, flatten(lightView));
         gl.uniform1f(gl.getUniformLocation(program_ground, "visibility"), 1.0);
-    
+
         gl.enable(gl.CULL_FACE)
-        gl.drawElements(gl.TRIANGLE_FAN, 4, gl.UNSIGNED_INT, 0);
+        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_INT, 0);
     }
-    
+
     function drawObject() {
         gl.useProgram(program_object);
-    
+
         gl.bindBuffer(gl.ARRAY_BUFFER, model.vBuffer);
         gl.vertexAttribPointer(program_object.vPosition, 4, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(program_object.vPosition);
-    
+
         gl.bindBuffer(gl.ARRAY_BUFFER, model.nBuffer);
         gl.vertexAttribPointer(program_object.vNormal, 4, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(program_object.vNormal);
-    
+
         gl.bindBuffer(gl.ARRAY_BUFFER, model.cBuffer);
         gl.vertexAttribPointer(program_object.vColor, 4, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(program_object.vColor);
-    
+        
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.idxBuffer);
         gl.uniformMatrix4fv(program_object.vLoc, false, flatten(view));
         gl.uniformMatrix4fv(program_object.pLoc, false, flatten(projection));
         gl.uniformMatrix4fv(program_object.mloc, false, flatten(objectModel));
         gl.uniform1f(gl.getUniformLocation(program_object, "visibility"), 1.0);
-    
+
         gl.disable(gl.CULL_FACE);
-    
+
         gl.drawElements(gl.TRIANGLES, object.indices.length, gl.UNSIGNED_INT, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     }
 };
-
-
-
-
 
 
 // Load a model from an OBJ file
@@ -249,26 +260,30 @@ function initAttributeVariable(gl, attribute, buffer) {
 }
 
 function initVertexBuffers(gl, program) {
-    var obj = new Object();
-    obj.vBuffer = create(program.vPosition);
-    obj.nBuffer = create(program.vNormal);
-    obj.cBuffer = create(program.vColor);
+    var obj = new Object(); // Utilize Object object to return multiple buffer objects
+    obj.vBuffer = createEmptyArrayBuffer(gl, program.vPosition, 4, gl.FLOAT);
+    obj.vBuffer.num = 4; obj.vBuffer.type = gl.FLOAT;
+    obj.nBuffer = createEmptyArrayBuffer(gl, program.vNormal, 4, gl.FLOAT);
+    obj.nBuffer.num = 4; obj.nBuffer.type = gl.FLOAT;
+    obj.cBuffer = createEmptyArrayBuffer(gl, program.vColor, 4, gl.FLOAT);
+    obj.cBuffer.num = 4; obj.cBuffer.type = gl.FLOAT;
     obj.idxBuffer = gl.createBuffer();
 
-    if (!(obj.vBuffer || obj.nBuffer || obj.cBuffer || obj.idxBuffer)) { return null; }
-
     return obj;
-
     // save me some repetitive writing.
-    function create(pos) {
-        var buffer = gl.createBuffer();
-        buffer.num = 4;
+    function createEmptyArrayBuffer(gl, a_attribute, num, type) {
+        var buffer = gl.createBuffer();  // Create a buffer object
+        
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.vertexAttribPointer(pos, 4, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray
+        gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);
+        gl.enableVertexAttribArray(a_attribute);  
+
         return buffer;
     }
-}
+};
+
+
+
 
 function buffer(gl, model, drawingInfo) {
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vBuffer);
@@ -283,6 +298,7 @@ function buffer(gl, model, drawingInfo) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.idxBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, drawingInfo.indices, gl.STATIC_DRAW);
 
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
     return true;
 }
 
