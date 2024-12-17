@@ -41,14 +41,14 @@ window.onload = function init() {
     const camera = new Object();
     camera.position = vec3(0, 0, 3);
     camera.view = lookAt(vec3(0, 0, 5), vec3(0, 0, 0), vec3(0, 1, 0));
-    camera.projection = perspective(60, 1, 0.1, 10);
+    camera.projection = perspective(60, 1, 0.1, 1e5);
 
 
     currentAngle = [0.0, 0.0];
     var q_rot = new Quaternion();
     var q_inc = new Quaternion();
 
-    var z_eye = 3;
+    var z_eye = 500;
     eye = vec3(0, 0, z_eye);
     const at = vec3(0, 0, 0);
 
@@ -58,7 +58,7 @@ window.onload = function init() {
 
     let x_pan = 0; let y_pan = 0;
 
-    //initEventHandlers(canvas, q_inc, q_rot);
+    initEventHandlers(canvas, q_inc, q_rot);
 
     const rotate = document.getElementById("rotate");
     rotate.addEventListener('click', function () { mode = 0; });
@@ -67,10 +67,10 @@ window.onload = function init() {
     pan.addEventListener('click', function () { mode = 2; });
 
     const rat = document.getElementById("rat");
-    rat.addEventListener('click', function () { loadmodel(gl, '../assets/rat.obj', 0.02); });
+    rat.addEventListener('click', function () { loadmodel(gl, '../assets/rat.obj', 1); });
 
     const teapot = document.getElementById("teapot");
-    teapot.addEventListener('click', function () { loadmodel(gl, '../assets/teapot.obj', 0.2); });
+    teapot.addEventListener('click', function () { loadmodel(gl, '../assets/teapot.obj', 15); });
 
     canvas.addEventListener('click', (event) => {
         selectedObject = selectObject(event, canvas, camera, objects)
@@ -219,7 +219,7 @@ window.onload = function init() {
             gl.drawElements(gl.TRIANGLES, object.indices.length, gl.UNSIGNED_INT, 0);
         }
     }
-    loadmodel(gl, '../assets/teapot.obj', 0.2);
+
     animate();
 
 }

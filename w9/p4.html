@@ -47,6 +47,7 @@
 
         void main() {
             vec4 tex = texture2D(texMap, fTexCoord);
+            vec4 test = texture2D(u_ShadowMap, fTexCoord);
             vec4 marble = vec4(tex.xyz, 1.0);
 
             vec4 v_PositionFromLight = projection * viewFromLight * model * vec4(fPosition, 1.0);
@@ -58,7 +59,7 @@
 
             float visibility = (shadowCoord.z > depth + 0.005) ? 1.0 : 0.7;
 
-            gl_FragColor = vec4(marble.rgb * visibility, marble.a);
+            gl_FragColor = test; // vec4(marble.rgb * visibility, marble.a);
 
             }
     </script>
@@ -108,15 +109,27 @@
 
       void main() {
 
-          gl_Position = vPosition;
+          gl_Position = projection * view * model * vPosition;
 
       }
     </script>
 
     <script id="fragment-shader-shadows" type="x-shader/x-fragment">
 
-      precision mediump float; void main(){   
-        gl_FragColor = vec4(gl_FragCoord.z, 0.0, 0.0, 0.0); 
+      precision mediump float; 
+        
+      void main() {
+          
+          const vec4 bitShift = vec4(1.0, 256.0, 256.0*256.0, 256.0*256.0*256.0); 
+      
+          const vec4 bitMask = vec4(1.0/256.0, 1.0/256.0, 1.0/256.0, 0.0);
+      
+          vec4 rgbaDepth = fract(gl_FragCoord.z*bitShift);
+      
+          rgbaDepth -= rgbaDepth.gbaa*bitMask;
+      
+          gl_FragColor = rgbaDepth; 
+  
       }
     </script>
   </head>
