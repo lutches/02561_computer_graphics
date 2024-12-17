@@ -141,7 +141,7 @@ window.onload = function init() {
             at[2] - (x_offset[2] + y_offset[2])  
         );
 
-
+        q_rot = q_rot.multiply(q_inc);
         eye = add(q_rot.apply(vec3(0, 0, z_eye)), center); 
         const view = lookAt(eye, center, q_rot.apply(up));
 
@@ -153,7 +153,7 @@ window.onload = function init() {
 
     function render() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        q_rot = q_rot.multiply(q_inc);
+        
 
         // Draw the object
         gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_INT, 0);

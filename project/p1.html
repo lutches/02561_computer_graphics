@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>w10p4</title>
+    <h1>WebGL 10 - Part 4</h1>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
+    <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+    <script type="text/javascript" src="../angelCommon/MV.js"></script>
+    <script type="text/javascript" src="../common/OBJParser.js"></script>
+    <script type="text/javascript" src="../common/quaternion.js"></script>
+    <script type="text/javascript" src="p1.js"></script>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      attribute vec4 a_Position;
+      attribute vec4 a_Normal;
+      attribute vec4 a_Color;
+
+      uniform vec4 alternativeColor;
+
+      varying vec4 v_Color; // Final color that is passed to the fragment-shader
+
+      uniform vec4 lightPos;
+
+      uniform mat4 view;
+      uniform mat4 cameraProjectionMatrix;
+
+      void main() {
+          vec4 pos = cameraProjectionMatrix * view * a_Position;
+
+          vec3 w_i = lightPos.w == 0.0 ? normalize(-lightPos.xyz) : normalize(lightPos.xyz - pos.xyz);
+          float diffuseFactor = max(dot(normalize(a_Normal.xyz), w_i), 0.0);
+
+          v_Color = alternativeColor.w == 0.0? a_Color * diffuseFactor : alternativeColor * diffuseFactor;
+          gl_Position = pos;
+      }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+      varying vec4 v_Color;
+
+      void main()
+      {
+          gl_FragColor = v_Color;
+      }
+    </script>
+    <div>
+      <canvas id="c" width="512" height="512"></canvas>
+    </div>
+    <menu id="controls" style="display: flex; justify-content: center; position: relative;">
+      <button id="rotate">Rotate</button>
+      <button id="pan">Pan</button>
+    </menu>
+    <menu id="controls" style="display: flex; justify-content: center; position: relative;">
+      <button id="rat">add Rat</button>
+      <button id="teapot">add Teapot</button>
+    </menu>
+  </body>
+</html>
