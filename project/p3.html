@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" style="max-height: fit-content; overflow-y: auto;">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>project</title>
+    <h1>Project</h1>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body style="overflow-y: auto; max-height: fit-content">
+    <script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
+    <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+    <script type="text/javascript" src="../angelCommon/MV.js"></script>
+    <script type="text/javascript" src="../common/OBJParser.js"></script>
+    <script type="text/javascript" src="../common/quaternion.js"></script>
+    <script src="../common/webgl-debug.js"></script>
+    <script type="text/javascript" src="p3.js"></script>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      attribute vec4 a_Position;
+      attribute vec4 a_Color;
+      attribute float a_Face;
+      uniform mat4 u_MVP;
+      uniform int u_PickedFace;
+      varying vec4 v_Color; // Final color that is passed to the fragment-shader
+
+      void main() {
+          gl_Position = u_MVP * a_Position;
+          int face = int(a_Face);
+          vec3 color = (face == u_PickedFace) ? vec3(1.0) : a_Color.rgb;
+          if(u_PickedFace == 0) {
+            v_Color = vec4(color, a_Face/255.0);
+          }
+          else{
+            v_Color = vec4(color, a_Color.a);
+          }
+      }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+      varying vec4 v_Color;
+
+      void main()
+      {
+          gl_FragColor = v_Color;
+      }
+    </script>
+
+    <div>
+      <canvas id="c" width="512" height="512"></canvas>
+    </div>
+    <menu
+      id="controls"
+      style="display: flex; justify-content: center; position: relative"
+    >
+    </menu>
+    <a
+      style="
+        display: flex;
+        justify-self: center;
+        margin-inline: 5%;
+        margin-bottom: 5%;
+      "
+    >
+      If you press a side you will see that side turn white <br />
+      zoom with scroll and rotate with mouse1
+    </a>
+    <hr />
+    <h1>Final Project Report: Object Selection in Computer Graphics</h1>
+    <a
+      style="
+        display: flex;
+        justify-self: center;
+        margin-inline: 5%;
+        margin-top: 2%;
+        margin-bottom: 40px;
+      "
+    >
+      For my project, I started with the object selection example, borrowing
+      much of the code from the examples provided. However, I also included
+      pieces from my own worksheets and added some new functionality to make it
+      my own. <br />
+      I decided to begin with the code from worksheet10p4 because it already had
+      most of what I needed to show an object from different sides and
+      distances. But I simplified it quite a bit since I didn’t see much point
+      in including panning or having multiple buttons for this project. The
+      object selection method I used in parts 2 and 3 is based on rendering the
+      scene in specific colors and reading the pixel color value under the
+      cursor. It’s a simple but effective way to implement selection. <br />
+      Part 2: In part 2, we implemented basic object selection by drawing the
+      cube in a solid red color during a hidden render pass. The red value (R)
+      of the pixel under the cursor is checked, and if it’s 255, we know the
+      cube was selected. To avoid flashing the user with a bright red cube, this
+      "hidden" draw call is never actually displayed—it's overridden by a normal
+      draw in the same frame. If the selection is successful, we just alert the
+      user that the object was selected.<br />
+      Part 3: In part 3, I extended this to select individual sides of the cube.
+      Instead of rendering the whole cube red, I rendered each face using its
+      face index as the alpha channel value during a hidden render pass. By
+      reading the alpha value under the cursor, the program can figure out which
+      face was clicked. Once a face is selected, we change its color to white so
+      the user can see which side was picked. This makes the selection process
+      clear and intuitive.<br />
+      This method works well and is computationally simple. By using hidden
+      renders and per-pixel color detection, it avoids more complex techniques
+      like ray casting or scene traversal, while still being accurate and
+      efficient.<br />
+      some downsides of this approach is that it relies hevily on hidden
+      rendering passes which may not integrate simply into more complex
+      rendering pipelines or scenes. making it less flexible than other options.
+      It could also might not scale well for more complex objects or more
+      complex shaders. And while this was not the inteded use case in this
+      project for programs where you want to select all objects in a line even
+      if hidden behind other objects such as shooting games this cannot identify
+      objects behind the first one.<br />
+    </a>
+  </body>
+</html>

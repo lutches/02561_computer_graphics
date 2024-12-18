@@ -1,0 +1,15 @@
+Final Project Report: Object Selection in Computer Graphics
+
+For my project, I started with the object selection example, borrowing much of the code from the examples provided. However, I also included pieces from my own worksheets and added some new functionality to make it my own.
+
+I decided to begin with the code from worksheet10p4 because it already had most of what I needed to show an object from different sides and distances. But I simplified it quite a bit since I didn’t see much point in including panning or having multiple buttons for this project. The object selection method I used in parts 2 and 3 is based on rendering the scene in specific colors and reading the pixel color value under the cursor. It’s a simple but effective way to implement selection.
+
+Part 2:
+In part 2, we implemented basic object selection by drawing the cube in a solid red color during a hidden render pass. The red value (R) of the pixel under the cursor is checked, and if it’s 255, we know the cube was selected. To avoid flashing the user with a bright red cube, this "hidden" draw call is never actually displayed—it's overridden by a normal draw in the same frame. If the selection is successful, we just alert the user that the object was selected.
+
+Part 3:
+In part 3, I extended this to select individual sides of the cube. Instead of rendering the whole cube red, I rendered each face using its face index as the alpha channel value during a hidden render pass. By reading the alpha value under the cursor, the program can figure out which face was clicked. Once a face is selected, we change its color to white so the user can see which side was picked. This makes the selection process clear and intuitive.
+
+This method works well and is computationally simple. By using hidden renders and per-pixel color detection, it avoids more complex techniques like ray casting or scene traversal, while still being accurate and efficient.
+
+some downsides of this approach is that it relies hevily on hidden rendering passes which may not integrate simply into more complex rendering pipelines or scenes. making it less flexible than other options. It could also might not scale well for more complex objects or more complex shaders. And while this was not the inteded use case in this project for programs where you want to select all objects in a line even if hidden behind other objects such as shooting games this cannot identify objects behind the first one. 

@@ -28,6 +28,7 @@ window.onload = function init() {
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0);
 
     program = initShaders(gl, "vertex-shader", "fragment-shader");
+
     gl.useProgram(program);
     gl.getExtension('OES_element_index_uint');
 
@@ -60,27 +61,12 @@ window.onload = function init() {
 
     initEventHandlers(canvas, q_inc, q_rot);
 
-    const rotate = document.getElementById("rotate");
-    rotate.addEventListener('click', function () { mode = 0; });
 
-    const pan = document.getElementById("pan");
-    pan.addEventListener('click', function () { mode = 2; });
 
-    const rat = document.getElementById("rat");
-    rat.addEventListener('click', function () { loadmodel(gl, '../assets/rat.obj', 1); });
-
-    const teapot = document.getElementById("teapot");
-    teapot.addEventListener('click', function () { loadmodel(gl, '../assets/teapot.obj', 15); });
-
-    canvas.addEventListener('click', (event) => {
-        selectedObject = selectObject(event, canvas, camera, objects)
-        selected = selectedObject
-
-    });
 
     canvas.addEventListener('wheel', (event) => {
-        z_eye += event.deltaY * 0.01;
-        z_eye = Math.max(1, z_eye);
+        z_eye += event.deltaY * 0.03;
+        z_eye = Math.max(70, z_eye);
         event.preventDefault();
     }, { passive: false });
 
@@ -154,55 +140,70 @@ window.onload = function init() {
         let q_up = q_rot.apply(up);  // Up direction after rotation
 
         // Compute offsets for panning (x_pan and y_pan)
-        let x_offset = multiplyScalar(q_right, x_pan);
-        let y_offset = multiplyScalar(q_up, y_pan);
+        let x_offset = vec3(x_pan * q_right[0], x_pan * q_right[1], x_pan * q_right[2]);
+        let y_offset = vec3(y_pan * q_up[0], y_pan * q_up[1], y_pan * q_up[2]);
 
         // Update center based on pan offsets
         center = subtract(at, add(x_offset, y_offset));
 
-        // Update rotation quaternion by incrementing it
+
         q_rot = q_rot.multiply(q_inc);
 
-        // Recalculate the camera position based on rotation and center
+
         camera.position = add(q_rot.apply(vec3(0, 0, z_eye)), center);
 
-        // Compute the view matrix using the updated position, center, and up direction
+
         camera.view = lookAt(camera.position, center, q_up);
+        let MVP = mult(camera.projection, camera.view);
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, 'u_MVP'), false, flatten(MVP));
 
-
-
-        gl.uniformMatrix4fv(gl.getUniformLocation(program, 'view'), false, flatten(camera.view));
+        
         render();
         requestAnimationFrame(animate);
     }
     gl.uniform4fv(gl.getUniformLocation(program, 'lightPos'), flatten(vec4(0.0, 0.0, -1.0, 0.0)));
 
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "cameraProjectionMatrix"), false, flatten(camera.projection));
+    canvas.addEventListener('click', (ev) => {
+        var x = ev.clientX, y = ev.clientY;
+        var rect = ev.target.getBoundingClientRect();
+        if(rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) {
+            console.log('click');
+            var x_in_canvas = x - rect.left, y_in_canvas = rect.bottom - y;
+            var picked = check(gl,  gl.getUniformLocation(program, 'u_Clicked'), x_in_canvas, y_in_canvas);
+            if(picked) alert('The object is selected');
+        }
+    });
+
+    function check(gl, u_clicked, x, y){
+        var picked = false;
+        gl.uniform1i(u_clicked, 1);
+        render();
+    
+        var pixels = new Uint8Array(4);
+        gl.readPixels(x,y,1,1,gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+    
+        if (pixels[0]== 255) {picked = true;}
+    
+        gl.uniform1i(u_clicked, 0);
+        return picked;
+    }
 
     async function render() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
 
         for (let i = 0; i < objects.length; i++) {
             const object = objects[i];
             if (object == null) {
                 continue;
             }
-            await Promise.resolve(object);
-            if (i == selected) {
-                gl.uniform4fv(gl.getUniformLocation(program, 'alternativeColor'), flatten(vec4(1.0, 0.0, 0.0, 1.0)));
-            }
-            else {
-                gl.uniform4fv(gl.getUniformLocation(program, 'alternativeColor'), flatten(vec4(0.0, 0.0, 0.0, 0.0)));
-            }
-
+            
 
             gl.bindBuffer(gl.ARRAY_BUFFER, object.vBuffer);
             gl.vertexAttribPointer(gl.getAttribLocation(program, 'a_Position'), 4, gl.FLOAT, false, 0, 0);
             gl.enableVertexAttribArray(gl.getAttribLocation(program, 'a_Position'));
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, object.nBuffer);
-            gl.vertexAttribPointer(gl.getAttribLocation(program, 'a_Normal'), 4, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(gl.getAttribLocation(program, 'a_Normal'));
 
             gl.bindBuffer(gl.ARRAY_BUFFER, object.cBuffer);
             gl.vertexAttribPointer(gl.getAttribLocation(program, 'a_Color'), 4, gl.FLOAT, false, 0, 0);
@@ -214,6 +215,7 @@ window.onload = function init() {
             gl.drawElements(gl.TRIANGLES, object.indices.length, gl.UNSIGNED_INT, 0);
         }
     }
+    loadmodel(gl, '../assets/cube.obj', 30);
     animate();
 
 }
@@ -236,14 +238,6 @@ async function loadmodel(gl, reference, scale) {
     gl.vertexAttribPointer(gl.getAttribLocation(program, 'a_Position'), 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(gl.getAttribLocation(program, 'a_Position'));
 
-    // Create, bind, and initialize the vertex buffer for normals
-    object.nBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, object.nBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, object.normals, gl.STATIC_DRAW);
-
-    // Configure the vertex normal attribute
-    gl.vertexAttribPointer(gl.getAttribLocation(program, 'a_Normal'), 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(gl.getAttribLocation(program, 'a_Normal'));
 
     object.cBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, object.cBuffer);
@@ -272,107 +266,4 @@ function project_to_sphere(x, y) {
     return z;
 }
 
-function selectObject(event, canvas, camera, objects) {
-    const rect = canvas.getBoundingClientRect();
-    let mouseX = (event.clientX - rect.left) / rect.width * 2 - 1;
-    let mouseY = (1 - (event.clientY - rect.top) / rect.height) * 2 - 1;
-
-
-    const mouseNDC = vec4(mouseX, mouseY, -1, 1.0);
-    const viewProjectionMatrix = mult(camera.projection, camera.view);
-    const inverseViewProj = inverse(viewProjectionMatrix);
-
-    let rayStartWorld = mult(inverseViewProj, mouseNDC);
-    rayStartWorld = scale(1 / rayStartWorld[3], rayStartWorld);
-
-    const ray = {
-        origin: camera.position,
-        direction: normalize(subtract(vec3(rayStartWorld), camera.position)),
-        max: Infinity
-    };
-    let nearestObject = null;
-    let index = 0;
-
-    for (let object of objects) {
-        const intersection = intersectRayWithObject(ray, object);
-        if (intersection && intersection.distance < ray.max) {
-            nearestObject = object;
-            nearestObject.index = index;
-            ray.max = intersection.distance;
-        }
-        index++;
-    }
-
-    return nearestObject ? nearestObject.index : null;
-}
-
-
-function intersectRayWithObject(ray, object) {
-    let nearestIntersection = null;
-
-
-    for (let i = 0; i < object.indices.length; i += 3) {
-
-        const i0 = object.indices[i] * 3;    
-        const i1 = object.indices[i + 1] * 3;
-        const i2 = object.indices[i + 2] * 3;
-
-
-        const v0 = vec3(object.vertices[i0], object.vertices[i0 + 1], object.vertices[i0 + 2]);
-        const v1 = vec3(object.vertices[i1], object.vertices[i1 + 1], object.vertices[i1 + 2]);
-        const v2 = vec3(object.vertices[i2], object.vertices[i2 + 1], object.vertices[i2 + 2]);
-
-
-        const intersection = rayTriangleIntersect(ray, v0, v1, v2);
-
-        if (intersection && (!nearestIntersection || intersection.distance < nearestIntersection.distance)) {
-            nearestIntersection = intersection;
-        }
-    }
-
-    return nearestIntersection;
-}
-
-
-function rayTriangleIntersect(ray, v0, v1, v2) {
-    const EPSILON = 0.000001; 
-    const edge1 = subtract(v1, v0);
-    const edge2 = subtract(v2, v0);
-    const h = cross(ray.direction, edge2);
-    const a = dot(edge1, h);
-
-    if (a > -EPSILON && a < EPSILON) {
-        return null; 
-    }
-
-    const f = 1.0 / a;
-    const s = subtract(ray.origin, v0);
-    const u = f * dot(s, h);
-
-    if (u < 0.0 || u > 1.0) {
-        return null;
-    }
-
-    const q = cross(s, edge1);
-    const v = f * dot(ray.direction, q);
-
-    if (v < 0.0 || u + v > 1.0) {
-        return null;
-    }
-
-    const t = f * dot(edge2, q);
-
-    if (t > EPSILON) {
-        const intersectionPoint = add(ray.origin, multiplyScalar(ray.direction, t));  
-        return { distance: t, point: intersectionPoint };
-    } else {
-        return null; 
-    }
-}
-
-
-
-function multiplyScalar(v, scalar) {
-    return vec3(v[0] * scalar, v[1] * scalar, v[2] * scalar);
-}
 
